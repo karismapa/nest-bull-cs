@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Queue } from 'bull';
-import { InjectQueue } from '@nestjs/bull';
+import { Queue, Job } from 'bull';
+import { InjectQueue, OnQueueCompleted, OnQueueEvent, BullQueueEvents } from '@nestjs/bull';
 
 @Injectable()
 export class AppService {
@@ -17,7 +17,21 @@ export class AppService {
             await this.messageQueue.add(payload)
         }
 
-        this.messageQueue.on('completed', () => { console.log('DONE GAN') })
+        // this.messageQueue.on('global:completed', () => { console.log('DONE GAN') })
+    }
+
+    @OnQueueCompleted()
+    async completedGan() {
+        console.log('DONEEEEE')
+    }
+
+    @OnQueueEvent('global:completed')
+    onCompleted(job: Job) {
+        // this.logger.log(
+        // `Completed job ${job.id} of type ${job.name} with result ${job.returnvalue}`,
+        // );
+
+        console.log(`Completed job ${job.id} of type ${job.name} with result ${job.returnvalue}`)
     }
 
     async sendNamedMessage() {

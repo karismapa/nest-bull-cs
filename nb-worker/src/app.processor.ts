@@ -1,4 +1,4 @@
-import { Processor, Process, OnQueueActive, InjectQueue } from "@nestjs/bull";
+import { Processor, Process, InjectQueue, OnQueueCompleted, OnQueueEvent, BullQueueEvents } from "@nestjs/bull";
 import { Job, Queue } from 'bull';
 
 @Processor('message')
@@ -9,21 +9,9 @@ export class AppConsumer {
     async transcode(job: Job<unknown>) {
         console.log(job.data)
         
-        // let progress = 0;
-        // for (let i = 0; i < 100; i++) {
-        //     // await doSomething(job.data);
-        //     progress += 10;
-        //     job.progress(progress);
-        // }
-
-        // await this.sleep(1000)
-        
         console.log(`${JSON.stringify(job.data)} done`)
 
-        // job.remove().catch(err => console.log(err)) 
-        
-
-        return {};
+        return 'someRETURNVALUE';
     }
 
     @Process('namedTopic')
@@ -32,10 +20,24 @@ export class AppConsumer {
         await this.messageQueue.add(job.data)
     }
 
+    // @OnQueueCompleted()
+    // async completedGan() {
+    //     console.log('DONEEEEE')
+    // }
+
     sleep(ms) {
         return new Promise((resolve) => {
             setTimeout(resolve, ms);
         });
+    }
+
+    @OnQueueEvent(BullQueueEvents.COMPLETED)
+    onCompleted(job: Job) {
+        // this.logger.log(
+        // `Completed job ${job.id} of type ${job.name} with result ${job.returnvalue}`,
+        // );
+
+        console.log(`Completed job ${job.id} of type ${job.name} with result ${job.returnvalue}`)
     }
 
     // @OnQueueActive()
